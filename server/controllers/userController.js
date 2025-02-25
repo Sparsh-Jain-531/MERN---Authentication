@@ -12,7 +12,7 @@ export const getUserData=async (req, res, next) => {
             });
         }
         res.json({
-            status: true,
+            success: true,
             userData:{
                 name: user.name,
                 isAccountVerified: user.isAccountVerified
