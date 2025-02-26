@@ -2,53 +2,63 @@ import React, { useContext, useState } from "react";
 import { assets } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
-import axios from 'axios'
-import {toast} from "react-toastify"
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
 
-  const {backendUrl, setIsLoggedin, getUserData} = useContext(AppContext)
+  const { backendUrl, setIsLoggedin, getUserData } = useContext(AppContext);
 
   const [state, setState] = useState("Sign Up");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const onSubmitHandler = async(e)=>{
+  const onSubmitHandler = async (e) => {
     try {
-
       e.preventDefault();
 
-      axios.defaults.withCredentials = true
+      axios.defaults.withCredentials = true;
+      setLoading(true);
 
-      if(state === "Sign Up"){
-        const {data} = await axios.post(`${backendUrl}/api/auth/register`,{name, email, password})
+      if (state === "Sign Up") {
+        const { data } = await axios.post(`${backendUrl}/api/auth/register`, {
+          name,
+          email,
+          password,
+        });
 
-        if(data.success){
-          setIsLoggedin(true)
-          getUserData()
-          toast.success("Account Created successfully")
-          navigate('/')
+        if (data.success) {
+          setIsLoggedin(true);
+          getUserData();
+          toast.success("Account Created successfully");
+          navigate("/");
         } else {
-          toast.error(data.message)
+          toast.error(data.message);
         }
       } else {
-        const {data} = await axios.post(`${backendUrl}/api/auth/login`,{email, password})
+        const { data } = await axios.post(`${backendUrl}/api/auth/login`, {
+          email,
+          password,
+        });
 
-        if(data.success){
-          setIsLoggedin(true)
-          getUserData()
-          toast.success("Logged In successfully")
-          navigate('/')
+        if (data.success) {
+          setIsLoggedin(true);
+          getUserData();
+          toast.success("Logged In successfully");
+          navigate("/");
         } else {
-          toast.error(data.message)
+          toast.error(data.message);
         }
       }
     } catch (error) {
-      toast.error(error.message)
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400">
@@ -110,9 +120,35 @@ const Login = () => {
           >
             Forgot Password?
           </p>
-          <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium">
-            {state}
-          </button>
+          {loading ? (
+            <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-300 to-indigo-600 text-white font-medium flex justify-center">
+              <svg
+                className="ml-1 mr-2 h-5 w-5 animate-spin text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+              Submitting...
+            </button>
+          ) : (
+            <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium">
+              {state}
+            </button>
+          )}
         </form>
 
         {state === "Sign Up" ? (

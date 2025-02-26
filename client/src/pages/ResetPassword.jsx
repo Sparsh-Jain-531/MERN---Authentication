@@ -6,9 +6,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const ResetPassword = () => {
-
-  const {backendUrl} = useContext(AppContext)
-  axios.defaults.withCredentials=true;
+  const { backendUrl } = useContext(AppContext);
+  axios.defaults.withCredentials = true;
 
   const navigate = useNavigate();
 
@@ -17,6 +16,7 @@ const ResetPassword = () => {
   const [isEmailSent, setIsEmailSent] = useState("");
   const [otp, setOtp] = useState(0);
   const [isOtpSubmitted, setIsOtpSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const inputRefs = React.useRef([]);
 
@@ -42,11 +42,15 @@ const ResetPassword = () => {
     });
   };
 
-  const onSubmitEmail=async(e)=>{
+  const onSubmitEmail = async (e) => {
     e.preventDefault();
     try {
-      const {data}=await axios.post(`${backendUrl}/api/auth/send-reset-otp`,{email});
-      if(data.success){
+      setLoading(true);
+      const { data } = await axios.post(
+        `${backendUrl}/api/auth/send-reset-otp`,
+        { email }
+      );
+      if (data.success) {
         setIsEmailSent(true);
         toast.success(data.message);
       } else {
@@ -54,30 +58,38 @@ const ResetPassword = () => {
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  const onSubmitOtp=async(e)=>{
+  const onSubmitOtp = async (e) => {
     e.preventDefault();
-    const otpArray=inputRefs.current.map(e=>e.value)
-    setOtp(otpArray.join(""))
-    setIsOtpSubmitted(true)
-  }
+    const otpArray = inputRefs.current.map((e) => e.value);
+    setOtp(otpArray.join(""));
+    setIsOtpSubmitted(true);
+  };
 
-  const onSubmitNewPassword=async(e)=>{
+  const onSubmitNewPassword = async (e) => {
     e.preventDefault();
     try {
-      const {data}=await axios.post(`${backendUrl}/api/auth/reset-password`,{email,otp,newPassword})
-      if(data.success){
-        toast.success(data.message)
-        navigate("/login")
+      setLoading(true);
+      const { data } = await axios.post(
+        `${backendUrl}/api/auth/reset-password`,
+        { email, otp, newPassword }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        navigate("/login");
       } else {
-        toast.error(data.message)
+        toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message)
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-purple-400">
@@ -89,7 +101,10 @@ const ResetPassword = () => {
       />
 
       {!isEmailSent && (
-        <form onSubmit={onSubmitEmail} className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm">
+        <form
+          onSubmit={onSubmitEmail}
+          className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm"
+        >
           <h1 className="text-white text-2xl font-semibold text-center mb-4">
             Reset Password
           </h1>
@@ -107,14 +122,43 @@ const ResetPassword = () => {
               required
             />
           </div>
-          <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium">
-            Submit
-          </button>
+          {loading ? (
+            <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-300 to-indigo-600 text-white font-medium flex justify-center">
+              <svg
+                className="ml-1 mr-2 h-5 w-5 animate-spin text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+              Submitting...
+            </button>
+          ) : (
+            <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium">
+              Submit
+            </button>
+          )}
         </form>
       )}
 
       {!isOtpSubmitted && isEmailSent && (
-        <form onSubmit={onSubmitOtp} className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm">
+        <form
+          onSubmit={onSubmitOtp}
+          className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm"
+        >
           <h1 className="text-white text-2xl font-semibold text-center mb-4">
             Reset Password OTP
           </h1>
@@ -137,14 +181,43 @@ const ResetPassword = () => {
                 />
               ))}
           </div>
-          <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium">
-            Submit
-          </button>
+          {loading ? (
+            <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-300 to-indigo-600 text-white font-medium flex justify-center">
+              <svg
+                className="ml-1 mr-2 h-5 w-5 animate-spin text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+              Submitting...
+            </button>
+          ) : (
+            <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium">
+              Submit
+            </button>
+          )}
         </form>
       )}
 
       {isOtpSubmitted && isEmailSent && (
-        <form onSubmit={onSubmitNewPassword} className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm">
+        <form
+          onSubmit={onSubmitNewPassword}
+          className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm"
+        >
           <h1 className="text-white text-2xl font-semibold text-center mb-4">
             New Password
           </h1>
@@ -162,9 +235,35 @@ const ResetPassword = () => {
               required
             />
           </div>
-          <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium">
-            Submit
-          </button>
+          {loading ? (
+            <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-300 to-indigo-600 text-white font-medium flex justify-center">
+              <svg
+                className="ml-1 mr-2 h-5 w-5 animate-spin text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+              Submitting...
+            </button>
+          ) : (
+            <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium">
+              Submit
+            </button>
+          )}
         </form>
       )}
     </div>

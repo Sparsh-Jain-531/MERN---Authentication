@@ -6,11 +6,13 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const EmailVerify = () => {
-  axios.defaults.withCredentials=true;
+  const [loading, setLoading] = useState(false);
+
+  axios.defaults.withCredentials = true;
   const { backendUrl, isLoggedin, userData, getUserData } =
     useContext(AppContext);
 
-    const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const inputRefs = React.useRef([]);
 
@@ -36,31 +38,35 @@ const EmailVerify = () => {
     });
   };
 
-  const submitHandler=async(e)=>{
+  const submitHandler = async (e) => {
     try {
-
       e.preventDefault();
+      setLoading(true);
 
-      const otpArray=inputRefs.current.map(e=>e.value)
-      const otp=otpArray.join("");
-      const {data}=await axios.post(`${backendUrl}/api/auth/verify-account`,{otp})
+      const otpArray = inputRefs.current.map((e) => e.value);
+      const otp = otpArray.join("");
+      const { data } = await axios.post(
+        `${backendUrl}/api/auth/verify-account`,
+        { otp }
+      );
 
-      if(data.success){
+      if (data.success) {
         toast.success(data.message);
         getUserData();
         navigate("/");
       } else {
         toast.error(data.message);
       }
-
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  useEffect(()=>{
-    isLoggedin && userData && userData.isAccountVerified && navigate("/")
-  },[isLoggedin,userData])
+  useEffect(() => {
+    isLoggedin && userData && userData.isAccountVerified && navigate("/");
+  }, [isLoggedin, userData]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-purple-400">
@@ -70,7 +76,10 @@ const EmailVerify = () => {
         className="absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer"
         onClick={() => navigate("/")}
       />
-      <form onSubmit={submitHandler} className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm">
+      <form
+        onSubmit={submitHandler}
+        className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm"
+      >
         <h1 className="text-white text-2xl font-semibold text-center mb-4">
           Email Verify OTP
         </h1>
@@ -93,9 +102,35 @@ const EmailVerify = () => {
               />
             ))}
         </div>
-        <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium">
-          Verify Email
-        </button>
+        {loading ? (
+          <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-300 to-indigo-600 text-white font-medium flex justify-center">
+            <svg
+              className="ml-1 mr-2 h-5 w-5 animate-spin text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            Verifying...
+          </button>
+        ) : (
+          <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium">
+            Verify Email
+          </button>
+        )}
       </form>
     </div>
   );
